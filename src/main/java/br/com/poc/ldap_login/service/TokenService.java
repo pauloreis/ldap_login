@@ -1,6 +1,7 @@
 package br.com.poc.ldap_login.service;
 
 import br.com.poc.ldap_login.model.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ public class TokenService {
         Date hoje = new Date();
         Date dataExpiracao = new Date(hoje.getTime() + Long.parseLong(expiration));
 
+        //atenção aqui, pois no builder to token setamos o id do usuário logado no setSubject
         return Jwts.builder()
                 .setIssuer("Api Ldap")
                 .setSubject(logado.getId().toString())
@@ -41,5 +43,11 @@ public class TokenService {
             return false;
         }
 
+    }
+
+    public Long getIdUsuario(String token) {
+        //pegando informação do id do usuario no subject setado no body do token
+        Claims claims = Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody();
+        return Long.valueOf(claims.getSubject());
     }
 }
